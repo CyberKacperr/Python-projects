@@ -13,3 +13,15 @@ card_value = {
     "Q": 10,
     "K": 10
 }
+player1 = {
+    "wins": 0,
+    "nickname":"",
+    "cards": [],
+    "choice": ""
+}
+player2 = {
+    "wins": 0,
+    "nickname":"",
+    "cards": [],
+    "choice": ""
+}
