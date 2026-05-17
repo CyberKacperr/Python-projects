@@ -5,12 +5,16 @@ import random
 
 def bot_round():
     bot_value = calc_total(player2["cards"])
-
-    if bot_value < 17:
+    play_chance = random.random()
+    if bot_value < 12:
+        player2["choice"] = "draw"
         draw_card(deck,player2)
-        print(f"{player2['nickname']} dobiera \n")
     else:
         player2["choice"] = "pass"
-        print(f"{player2['nickname']} pasuje")
+        
+        if player2["choice"] == "draw":
+            print(f"{player2['nickname']} dobiera \n")
+        else:
+            print(f"{player2['nickname']} pasuje")
 
         

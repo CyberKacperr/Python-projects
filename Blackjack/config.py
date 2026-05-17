@@ -17,11 +17,13 @@ player1 = {
     "wins": 0,
     "nickname":"",
     "cards": [],
-    "choice": ""
+    "choice": "",
+    "money":1000
 }
 player2 = {
     "wins": 0,
     "nickname":"",
     "cards": [],
-    "choice": ""
+    "choice": "",
+    "money":10000,
 }

@@ -10,7 +10,12 @@ input("""
       Zasady dla tej wersji blackjacka:
       -Walczysz przeciwko dealerowi
       -Jeżeli twoja wartość kart przekroczy 21 to przegrywasz chyba że dealer też przekroczy to jest remis
-      -Znasz tylko swoje karty
+
+      Cel gry:
+      -Zdobyć 10000zł z portfelu dealera posiadając 1000zł
+      -Zwycięstwo z obstawioną kwotą sprawia iż ona wraca do ciebie z podwójną wartością (z portfelu dealera)
+      -Minimalna kwota obstawienia - 100zł
+      -jeżeli nie możesz obstawić to automatycznie przegrywasz
       
       Wciśnij enter aby kontynuować...
       """)
@@ -22,14 +27,9 @@ player1["nickname"] = player1_nickname.capitalize()
 player2["nickname"] = opponent_nickname.capitalize()
 
 # Do zrobienia:
-# Gracz dostaje 1000zł na start
-# Dealer dostaje 10000zł na start
-# Wpisujesz swoją kwotę do obstawienia:
-# Jeśli wygrasz: Odbierasz dealerowi obstawioną przez ciebie kwotę
-# Jeśli przegrasz: Oddajesz dealerowi obstawioną przez ciebie kwotę
-# Minimalna wartość do obstawienia: 100zł
-# Jeśli przejmiesz cały majątek dealera to wygrywasz (W przypadku bankructwa przegrywasz)
-# 
+
+
+# bonus: dodać aby jedna z 2 pierwszych kart dealera była cały czas pokazywana w terminalu
 
 for _ in range(2):
     draw_card(deck,player1)
@@ -37,15 +37,44 @@ for _ in range(2):
 
 def round():
     os.system("cls")
-    round_status = "start"
-
     global round_count
     global player1
     global player2
-    
-    message = "Wciśnij enter aby kontynuować"
-    input(f"Runda: {round_count} ({player1['wins']}:{player2['wins']})")
+    game = None
+    if player1["money"] < 100:
+        print("Nie stać cię na obstawienie. Przegrywasz")
+        game = "end"
+
+    elif player2["money"] <= 0:
+        print("Gratulacje, obrabowałeś dealera. Wygrywasz")
+        game = "end"
+
+    if game == "end":
+        print(f"Ilość rund: {round_count}:")
+        print(f"Zwycięstwa: {player1['wins']}")
+        print(f"Porażki: {round_count-player1['wins']}")
+        exit()
+
+    print(f"Runda: {round_count} ({player1['wins']}:{player2['wins']})")
     round_count+=1
+
+
+    
+    while True:
+        try:    
+            bet = int(input("Podaj kwotę do obstawienia (minimum 100zł): "))
+            if bet < 100:
+                input("Zbyt niska kwota...")
+                continue
+
+            elif bet > player1["money"]:
+                input("Stary, nawet cie na to nie stać...")
+                continue
+                
+            else: break
+        except ValueError:
+            print("błąd")
+    
     for _ in range(2):
         draw_card(deck,player1)
         draw_card(deck,player2)
@@ -63,53 +92,69 @@ def round():
         if player1["choice"] != "pass":
             choice = input("1 - dobierz kartę, 2 - pass \n")
 
+            if choice not in ["1","2"]:
+                input("Błąd wpisu. Wciśnij enter aby spróbować ponownie.")
+                os.system("cls")
+                continue
 
-        if choice not in ["1","2"]:
-            input("Błąd wpisu. Wciśnij enter aby spróbować ponownie.")
-            os.system("cls")
-            continue
 
-        match choice:
-            case "1":
+
+            if choice == "1":
                 if calc_total(player1["cards"]) < 20:
                     draw_card(deck,player1)
                 else:
-                    message = "Nie możesz już dobierać..."
-            case "2":
+                    input("Nie możesz już dobierać...")
+            else:
                 player1["choice"] = "pass"
-                print(f"Twój wynik: {total}")
+                print(f"Twój wynik: {total} \n")
+                os.system("cls")
         
         if player2["choice"] != "pass":
             bot_round()
         
         if player2["choice"] == "pass" and player1["choice"] == "pass":
-            round_status = "end"
+            os.system("cls")
             if player1_sum < 21 and player2_sum < 21:
-
+                # player1_status: True = win, False = loose
                 if player1_sum > player2_sum:
+                    player1_status = True
                     print(f"{player1['nickname']} wygrywa (Przewaga wartości kart).")
                     player1["wins"]+=1
 
                 elif player1_sum < player2_sum:
-                    print(f"{player1['nickname']} wygrywa (Przewaga wartości kart).")
+                    player1_status = False
+                    print(f"{player2['nickname']} wygrywa (Przewaga wartości kart).")
                     player2["wins"]+=1
             
-            elif player1_sum < 21 and player2_sum > 21:
+            elif player1_sum <= 21 and player2_sum > 21:
+                    player1_status = True
                     print(f"{player1['nickname']} wygrywa (wartość > 21).")
                     player1["wins"]+=1
 
-            elif player1_sum > 21 and player2_sum < 21:
-                    print(f"{player1['nickname']} wygrywa (wartość > 21).")
+            elif player1_sum > 21 and player2_sum <= 21:
+                    player1_status = False
+                    print(f"{player2['nickname']} wygrywa (wartość > 21).")
                     player2["wins"]+=1
 
-            else: print("Remis")
+            else: 
+                player1_status = None
+                print("Remis")
+        
+            if player1_status == True:
+                player1["money"]+=bet
+                player2["money"]-=bet
+            elif player1_status == False:
+                player1["money"]-=bet
+                player2["money"]+=bet
+        
+            print(f"Twój aktualny majątek: {player1['money']}")
+            print(f"Majątek {player2['nickname']}: {player2['money']} \n")
 
-
-        input(message)
+        input("Wciśnij enter aby kontynuować")
         os.system("cls")
         
-        if round_status == "end":
-            break
+
+        break
 
 def reset(player):
     player["choice"] = ""
