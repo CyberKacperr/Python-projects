@@ -7,7 +7,7 @@ values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 
 deck = [v + c for v in values for c in colors]
 
-def draw_card(deck,hand):
+def draw_card(hand):
             player_cards = hand["cards"]
             calc_total(player_cards)
             

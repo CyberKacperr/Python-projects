@@ -18,7 +18,8 @@ player1 = {
     "nickname":"",
     "cards": [],
     "choice": "",
-    "money":1000
+    "money":1000,
+    "status": None
 }
 player2 = {
     "wins": 0,
